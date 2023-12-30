@@ -1,17 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainManager : MonoBehaviour
 {
+
+
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -19,7 +23,8 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +42,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        
+        BestScoreText.text = $"Best Score : {SaveManager.Instance.Name} {SaveManager.Instance.Score}";
     }
 
     private void Update()
@@ -71,14 +78,15 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        SaveManager.Instance.Load();
         m_GameOver = true;
         GameOverText.SetActive(true);
-    }
+        BestScoreText.text = $"Best Score : {SaveManager.Instance.Name} {SaveManager.Instance.Score}";
 
-    [Serializable]
-    class SaveData
-    {
-        public string Name;
-        public int Score;
+        if (SaveManager.Instance.Score < m_Points)
+        {
+            SaveManager.Instance.SetScore(m_Points);
+            SaveManager.Instance.Save();
+        }
     }
 }
